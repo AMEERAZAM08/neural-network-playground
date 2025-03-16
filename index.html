@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Playground</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Neural Network Playground</h1>
+        <p class="header-subtitle">Interactive visualization of neural network architectures and concepts</p>
+    </header>
+    
+    <main>
+        <div class="container">
+            <div class="tools-panel">
+                <h2>Network Components</h2>
+                
+                <p class="hint-text">Drag components to the canvas to build your neural network</p>
+                
+                <div class="node-types">
+                    <div class="node-item" draggable="true" data-type="input">
+                        <div class="node input-node">Input Layer</div>
+                    </div>
+                    <div class="node-item" draggable="true" data-type="hidden">
+                        <div class="node hidden-node">Hidden Layer</div>
+                    </div>
+                    <div class="node-item" draggable="true" data-type="output">
+                        <div class="node output-node">Output Layer</div>
+                    </div>
+                    <div class="node-item" draggable="true" data-type="conv">
+                        <div class="node conv-node">Convolutional</div>
+                    </div>
+                    <div class="node-item" draggable="true" data-type="pool">
+                        <div class="node pool-node">Pooling</div>
+                    </div>
+                </div>
+                
+                <h3 class="section-title">Sample Data</h3>
+                <div class="sample-data">
+                    <div class="sample-item" data-sample="1">5</div>
+                    <div class="sample-item" data-sample="2">7</div>
+                    <div class="sample-item" data-sample="3">3</div>
+                </div>
+                
+                <div class="controls">
+                    <button id="run-network">Run Network</button>
+                    <button id="clear-canvas">Clear Canvas</button>
+                </div>
+                
+                <h3 class="section-title">Network Settings</h3>
+                <div class="network-settings">
+                    <div class="setting-group">
+                        <label for="learning-rate">Learning Rate:</label>
+                        <input type="range" id="learning-rate" min="0.001" max="1" step="0.001" value="0.1">
+                        <span class="setting-value" id="learning-rate-value">0.1</span>
+                    </div>
+                    <div class="setting-group">
+                        <label for="activation">Activation:</label>
+                        <select id="activation">
+                            <option value="relu">ReLU</option>
+                            <option value="sigmoid">Sigmoid</option>
+                            <option value="tanh">Tanh</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="canvas-container">
+                <div id="network-canvas" class="network-canvas">
+                    <div class="canvas-hint">
+                        <strong>Build Your Neural Network</strong>
+                        Drag components from the left panel and drop them here.
+                        <br>Connect them by dragging from output (right) to input (left) ports.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="properties-panel">
+                <h2>Layer Properties</h2>
+                <div id="node-properties">
+                    <p>Hover over a node to see its properties</p>
+                </div>
+                
+                <h3 class="section-title">Activation Function</h3>
+                <div class="activation-graph">
+                    <svg class="activation-curve" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <!-- Will be populated by JavaScript -->
+                    </svg>
+                </div>
+                
+                <h3 class="section-title">Layer Weights</h3>
+                <div id="weight-visualization"></div>
+                
+                <h3 class="section-title">Training Progress</h3>
+                <div class="training-progress">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span class="metric-label">Loss:</span>
+                            <span class="metric-value" id="loss-value">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Accuracy:</span>
+                            <span class="metric-value" id="accuracy-value">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div class="tooltip" id="node-tooltip">
+        <div class="tooltip-content"></div>
+    </div>
+    
+    <footer>
+        <p>Neural Network Playground - Learn and visualize neural networks interactively</p>
+        <div class="footer-links">
+            <a href="#" id="about-link">About</a>
+            <a href="#" id="guide-link">User Guide</a>
+            <a href="https://github.com/yourusername/neural-network-playground" target="_blank">GitHub</a>
+        </div>
+    </footer>
+    
+    <div class="modal" id="about-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>About Neural Network Playground</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>This playground allows you to experiment with neural networks visually. Build networks by dragging and dropping layer components, connecting them, and running simulations.</p>
+                <p>Learn about different layer types, activation functions, and see how data flows through the network.</p>
+                <h4>Key Concepts:</h4>
+                <ul>
+                    <li><strong>Input Layer:</strong> Receives raw data (like images) and passes it to the network</li>
+                    <li><strong>Hidden Layers:</strong> Extract and process features from the data</li>
+                    <li><strong>Output Layer:</strong> Provides the final prediction or classification</li>
+                    <li><strong>Convolutional Layer:</strong> Specialized for image processing, detects spatial patterns</li>
+                    <li><strong>Pooling Layer:</strong> Reduces dimensions while preserving important features</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Layer Editor Modal -->
+    <div id="layer-editor-modal" class="modal layer-editor-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="modal-title">Edit Layer</h2>
+            <form class="layer-form">
+                <!-- Form fields will be dynamically generated based on layer type -->
+            </form>
+        </div>
+    </div>
+    <!-- End Layer Editor Modal -->
+    
+    <script src="js/main.js"></script>
+    <script src="js/neural-network.js"></script>
+    <script src="js/drag-drop.js"></script>
+</body>
+</html> 
