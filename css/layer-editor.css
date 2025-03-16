@@ -1,0 +1,202 @@
+/* Layer Editor Styles for Neural Network Playground */
+
+/* Modal styling */
+#layer-editor-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#layer-editor-modal.active {
+    opacity: 1;
+}
+
+#layer-editor-modal .modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+    overflow: hidden; /* Prevent content from causing layout shifts */
+}
+
+#layer-editor-modal.active .modal-content {
+    transform: translateY(0);
+}
+
+/* Make the modal more obvious for debugging */
+#layer-editor-modal[data-visible="true"] {
+    /* Remove the debug border */
+    /* border: 3px solid red; */
+}
+
+.modal-title {
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Top close button */
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+    transition: color 0.2s ease;
+    z-index: 10; /* Ensure it's above other content */
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+/* Form styling */
+.layer-form {
+    margin-bottom: 20px;
+    overflow: auto; /* Allow scrolling if form gets too long */
+    max-height: 60vh; /* Limit height to avoid modal being too tall */
+}
+
+.form-field {
+    margin-bottom: 15px;
+}
+
+.form-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.form-field input,
+.form-field select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.help-text {
+    display: block;
+    margin-top: 5px;
+    color: #7f8c8d;
+    font-size: 12px;
+}
+
+/* Button styling */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    background-color: #fff; /* Ensure background is solid */
+    position: relative; /* Establish a stacking context */
+    z-index: 5; /* Higher than the form */
+}
+
+.modal-footer button {
+    padding: 8px 16px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    /* Remove transition to prevent flickering */
+    /* transition: background-color 0.2s ease; */
+    position: relative; /* Establish a stacking context */
+    z-index: 2; /* Higher than surrounding elements */
+    text-rendering: optimizeLegibility; /* Improve text rendering */
+    -webkit-font-smoothing: antialiased;
+}
+
+.save-layer-btn {
+    background-color: #3498db;
+    color: white;
+    /* Fix position and prevent movement */
+    transform: translateZ(0); /* Force GPU acceleration */
+}
+
+.save-layer-btn:hover {
+    background-color: #2980b9;
+}
+
+/* Override for close button in footer */
+.modal-footer .close-modal {
+    position: static;
+    background-color: #e0e0e0;
+    color: #333;
+    font-size: 14px;
+    transform: translateZ(0); /* Force GPU acceleration */
+}
+
+.modal-footer .close-modal:hover {
+    background-color: #ccc;
+}
+
+/* For number inputs */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Error state */
+.form-field.error input,
+.form-field.error select {
+    border-color: #e74c3c;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #layer-editor-modal .modal-content {
+        width: 90%;
+        margin: 15% auto;
+        padding: 15px;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer button {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+} 
