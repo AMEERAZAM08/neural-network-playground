@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neural Network Playground</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/drag-drop-fix.css">
+    <link rel="stylesheet" href="css/layer-editor.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,102 +16,417 @@
     <header>
         <h1>Neural Network Playground</h1>
         <p class="header-subtitle">Interactive visualization of neural network architectures and concepts</p>
+        
+        <!-- Tab Navigation -->
+        <div class="tabs-container">
+            <div class="tab-nav">
+                <button class="tab-button active" data-tab="network-design">Network Design</button>
+                <button class="tab-button" data-tab="backpropagation">Backpropagation</button>
+                <button class="tab-button" data-tab="forward-propagation">Forward Propagation</button>
+                <button class="tab-button" data-tab="background-animation">Neural Background</button>
+            </div>
+        </div>
     </header>
     
     <main>
-        <div class="container">
-            <div class="tools-panel">
-                <h2>Network Components</h2>
-                
-                <p class="hint-text">Drag components to the canvas to build your neural network</p>
-                
-                <div class="node-types">
-                    <div class="node-item" draggable="true" data-type="input">
-                        <div class="node input-node">Input Layer</div>
-                    </div>
-                    <div class="node-item" draggable="true" data-type="hidden">
-                        <div class="node hidden-node">Hidden Layer</div>
-                    </div>
-                    <div class="node-item" draggable="true" data-type="output">
-                        <div class="node output-node">Output Layer</div>
-                    </div>
-                    <div class="node-item" draggable="true" data-type="conv">
-                        <div class="node conv-node">Convolutional</div>
-                    </div>
-                    <div class="node-item" draggable="true" data-type="pool">
-                        <div class="node pool-node">Pooling</div>
-                    </div>
-                </div>
-                
-                <h3 class="section-title">Sample Data</h3>
-                <div class="sample-data">
-                    <div class="sample-item" data-sample="1">5</div>
-                    <div class="sample-item" data-sample="2">7</div>
-                    <div class="sample-item" data-sample="3">3</div>
-                </div>
-                
-                <div class="controls">
-                    <button id="run-network">Run Network</button>
-                    <button id="clear-canvas">Clear Canvas</button>
-                </div>
-                
-                <h3 class="section-title">Network Settings</h3>
-                <div class="network-settings">
-                    <div class="setting-group">
-                        <label for="learning-rate">Learning Rate:</label>
-                        <input type="range" id="learning-rate" min="0.001" max="1" step="0.001" value="0.1">
-                        <span class="setting-value" id="learning-rate-value">0.1</span>
-                    </div>
-                    <div class="setting-group">
-                        <label for="activation">Activation:</label>
-                        <select id="activation">
-                            <option value="relu">ReLU</option>
-                            <option value="sigmoid">Sigmoid</option>
-                            <option value="tanh">Tanh</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="canvas-container">
-                <div id="network-canvas" class="network-canvas">
-                    <div class="canvas-hint">
-                        <strong>Build Your Neural Network</strong>
-                        Drag components from the left panel and drop them here.
-                        <br>Connect them by dragging from output (right) to input (left) ports.
-                    </div>
-                </div>
-            </div>
-            
-            <div class="properties-panel">
-                <h2>Layer Properties</h2>
-                <div id="node-properties">
-                    <p>Hover over a node to see its properties</p>
-                </div>
-                
-                <h3 class="section-title">Activation Function</h3>
-                <div class="activation-graph">
-                    <svg class="activation-curve" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <!-- Will be populated by JavaScript -->
-                    </svg>
-                </div>
-                
-                <h3 class="section-title">Layer Weights</h3>
-                <div id="weight-visualization"></div>
-                
-                <h3 class="section-title">Training Progress</h3>
-                <div class="training-progress">
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: 0%"></div>
-                    </div>
-                    <div class="metrics">
-                        <div class="metric">
-                            <span class="metric-label">Loss:</span>
-                            <span class="metric-value" id="loss-value">-</span>
+        <!-- Network Design Tab -->
+        <div class="tab-content active" id="network-design-tab">
+            <div class="container">
+                <div class="tools-panel">
+                    <h2>Network Components</h2>
+                    
+                    <p class="hint-text">Drag components to the canvas to build your neural network</p>
+                    
+                    <div class="node-types">
+                        <div class="node-item" draggable="true" data-type="input">
+                            <div class="node input-node">Input Layer</div>
                         </div>
-                        <div class="metric">
-                            <span class="metric-label">Accuracy:</span>
-                            <span class="metric-value" id="accuracy-value">-</span>
+                        <div class="node-item" draggable="true" data-type="hidden">
+                            <div class="node hidden-node">Hidden Layer</div>
+                        </div>
+                        <div class="node-item" draggable="true" data-type="output">
+                            <div class="node output-node">Output Layer</div>
+                        </div>
+                        <div class="node-item" draggable="true" data-type="conv">
+                            <div class="node conv-node">Convolutional</div>
+                        </div>
+                        <div class="node-item" draggable="true" data-type="pool">
+                            <div class="node pool-node">Pooling</div>
+                        </div>
+                        <div class="node-item" draggable="true" data-type="lstm">
+                            <div class="node lstm-node">LSTM</div>
+                        </div>
+                        <div class="node-item" draggable="true" data-type="rnn">
+                            <div class="node rnn-node">RNN</div>
+                        </div>
+                        <div class="node-item" draggable="true" data-type="gru">
+                            <div class="node gru-node">GRU</div>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="run-network">Run Network</button>
+                        <button id="clear-canvas">Clear Canvas</button>
+                    </div>
+                    
+                    <h3 class="section-title">Network Settings</h3>
+                    <div class="network-settings">
+                        <div class="setting-group">
+                            <label for="learning-rate">Learning Rate:</label>
+                            <input type="range" id="learning-rate" class="range-slider" min="0.001" max="1" step="0.001" value="0.1">
+                            <div class="setting-value">
+                                <span id="learning-rate-value">0.1</span>
+                            </div>
+                        </div>
+                        <div class="setting-group">
+                            <label for="activation">Activation:</label>
+                            <select id="activation">
+                                <option value="relu">ReLU</option>
+                                <option value="sigmoid">Sigmoid</option>
+                                <option value="tanh">Tanh</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label for="optimizer">Optimizer:</label>
+                            <select id="optimizer">
+                                <option value="sgd">SGD</option>
+                                <option value="adam">Adam</option>
+                                <option value="rmsprop">RMSProp</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="canvas-container">
+                    <div id="network-canvas" class="network-canvas">
+                        <div class="canvas-hint">
+                            <strong>Build Your Neural Network</strong>
+                            Drag components from the left panel and drop them here.
+                            <br>Connect them by dragging from output (right) to input (left) ports.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="properties-panel">
+                    <h2>Layer Properties</h2>
+                    <div id="node-properties">
+                        <p>Hover over a node to see its properties</p>
+                    </div>
+                    
+                    <h3 class="section-title">Activation Function</h3>
+                    <div class="activation-graph">
+                        <svg class="activation-curve" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <!-- Will be populated by JavaScript -->
+                        </svg>
+                    </div>
+                    
+                    <h3 class="section-title">Layer Weights</h3>
+                    <div id="weight-visualization"></div>
+                    
+                    <h3 class="section-title">Training Progress</h3>
+                    <div class="training-progress">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 0%"></div>
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <span class="metric-label">Loss:</span>
+                                <span class="metric-value" id="loss-value">-</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Accuracy:</span>
+                                <span class="metric-value" id="accuracy-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Backpropagation Tab -->
+        <div class="tab-content" id="backpropagation-tab">
+            <div class="container backprop-container">
+                <div class="backprop-info-panel">
+                    <h2>Backpropagation Explained</h2>
+                    <p class="intro-text">
+                        Backpropagation is the key algorithm that allows neural networks to learn from data. It works by 
+                        calculating how much each weight in the network contributes to the overall error and adjusting 
+                        the weights to minimize this error.
+                    </p>
+                    
+                    <div class="backprop-steps">
+                        <h3>The Steps of Backpropagation:</h3>
+                        <ol>
+                            <li>
+                                <strong>Forward Pass</strong>
+                                <p>Input data flows through the network to produce a prediction.</p>
+                            </li>
+                            <li>
+                                <strong>Calculate Error</strong>
+                                <p>Compare the prediction with the expected output to compute the error.</p>
+                            </li>
+                            <li>
+                                <strong>Backward Pass</strong>
+                                <p>Propagate the error backward through the network.</p>
+                            </li>
+                            <li>
+                                <strong>Update Weights</strong>
+                                <p>Adjust each weight based on its contribution to the error.</p>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div class="backprop-controls">
+                        <button id="start-animation">Start Animation</button>
+                        <button id="pause-animation">Pause</button>
+                        <button id="reset-animation">Reset</button>
+                        <div class="speed-control">
+                            <label for="animation-speed">Speed:</label>
+                            <input type="range" id="animation-speed" min="1" max="10" value="5">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="backprop-visualization">
+                    <div class="animation-container">
+                        <canvas id="backprop-canvas"></canvas>
+                        <div class="animation-overlay">
+                            <div id="current-step-info">
+                                <h4>Step: <span id="step-name">Forward Pass</span></h4>
+                                <p id="step-description">Data is flowing through the network...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="formula-section">
+                        <h3>Mathematical Insight</h3>
+                        <div class="formula-display">
+                            <div class="formula">
+                                <span class="formula-title">Gradient Descent Update:</span>
+                                <span class="formula-math">w = w - η ∇L(w)</span>
+                            </div>
+                            <div class="formula">
+                                <span class="formula-title">Chain Rule:</span>
+                                <span class="formula-math">∂L/∂w = (∂L/∂y) × (∂y/∂w)</span>
+                            </div>
+                        </div>
+                        <p class="formula-explanation">
+                            The gradient (∇L) shows the direction of steepest increase in error. 
+                            By moving in the opposite direction, we minimize the error.
+                            The learning rate (η) controls the step size.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="backprop-details-panel">
+                    <h3>Understanding the Animation</h3>
+                    <div class="animation-legend">
+                        <div class="legend-item">
+                            <div class="color-box forward-color"></div>
+                            <span>Forward Signal Flow</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box error-color"></div>
+                            <span>Error Calculation</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box backward-color"></div>
+                            <span>Backward Error Propagation</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box update-color"></div>
+                            <span>Weight Updates</span>
+                        </div>
+                    </div>
+                    
+                    <div class="variable-display">
+                        <h4>Current Variables</h4>
+                        <div id="variables-container">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Forward Propagation Tab -->
+        <div class="tab-content" id="forward-propagation-tab">
+            <div class="container forward-container">
+                <div class="forward-info-panel">
+                    <h2>Forward Propagation Explained</h2>
+                    <p class="intro-text">
+                        Forward propagation is the process by which input data flows through a neural network to generate predictions.
+                        This is how neural networks make inferences after they've been trained.
+                    </p>
+                    
+                    <div class="forward-steps">
+                        <h3>How Forward Propagation Works:</h3>
+                        <ol>
+                            <li>
+                                <strong>Input Layer</strong>
+                                <p>The network receives data through its input neurons.</p>
+                            </li>
+                            <li>
+                                <strong>Hidden Layer Computation</strong>
+                                <p>Each hidden neuron computes a weighted sum of inputs and applies an activation function.</p>
+                            </li>
+                            <li>
+                                <strong>Output Generation</strong>
+                                <p>The final layer produces the network's prediction or classification.</p>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div class="forward-controls">
+                        <button id="start-forward-animation">Start Animation</button>
+                        <button id="pause-forward-animation">Pause</button>
+                        <button id="reset-forward-animation">Reset</button>
+                        <div class="data-input-control">
+                            <label for="input-selector">Sample Input:</label>
+                            <select id="input-selector">
+                                <option value="sample1">Sample 1 [0.8, 0.2, 0.5]</option>
+                                <option value="sample2">Sample 2 [0.1, 0.9, 0.3]</option>
+                                <option value="sample3">Sample 3 [0.5, 0.5, 0.5]</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="forward-visualization">
+                    <div class="animation-container">
+                        <canvas id="forward-canvas"></canvas>
+                        <div class="animation-overlay">
+                            <div id="forward-step-info">
+                                <h4>Current Layer: <span id="current-layer">Input</span></h4>
+                                <p id="forward-description">Data enters the network through the input layer.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="computation-section">
+                        <h3>Computations in Detail</h3>
+                        <div class="computation-display">
+                            <div id="computation-formula" class="formula-math">
+                                z = w₁x₁ + w₂x₂ + ... + wₙxₙ + b
+                            </div>
+                            <div id="activation-formula" class="formula-math">
+                                a = σ(z)
+                            </div>
+                        </div>
+                        <div id="computation-values">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="forward-details-panel">
+                    <h3>Network Details</h3>
+                    <div class="network-architecture">
+                        <h4>Architecture</h4>
+                        <div class="architecture-info">
+                            <p>Input layer: 3 neurons</p>
+                            <p>Hidden layer: 4 neurons (ReLU activation)</p>
+                            <p>Output layer: 2 neurons (Sigmoid activation)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="activation-functions">
+                        <h4>Activation Functions</h4>
+                        <div class="function-item">
+                            <div class="function-name">ReLU:</div>
+                            <div class="function-formula">f(x) = max(0, x)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">Sigmoid:</div>
+                            <div class="function-formula">f(x) = 1 / (1 + e<sup>-x</sup>)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Background Animation Tab -->
+        <div class="tab-content" id="background-animation-tab">
+            <div class="container background-animation-container">
+                <div class="background-info-panel">
+                    <h2>Neural Network Visualization</h2>
+                    <p class="intro-text">
+                        This visualization represents neurons firing in a neural network. Watch as activation patterns
+                        form and spread across the network, simulating how information flows through neural pathways.
+                    </p>
+                    
+                    <div class="visualization-controls">
+                        <div class="control-group">
+                            <h3>Visualization Controls</h3>
+                            
+                            <div class="control-item">
+                                <label for="neuron-count">Neuron Count:</label>
+                                <input type="range" id="neuron-count" min="50" max="300" value="150">
+                                <span id="neuron-count-value">150</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <label for="connection-distance">Connection Distance:</label>
+                                <input type="range" id="connection-distance" min="50" max="200" value="100">
+                                <span id="connection-distance-value">100</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <label for="firing-speed">Firing Speed:</label>
+                                <input type="range" id="firing-speed" min="1" max="10" value="5">
+                                <span id="firing-speed-value">5</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <label for="firing-color">Firing Color:</label>
+                                <select id="firing-color">
+                                    <option value="blue">Blue</option>
+                                    <option value="purple">Purple</option>
+                                    <option value="rainbow">Rainbow</option>
+                                    <option value="green">Green</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="animation-buttons">
+                            <button id="start-background-animation">Start Animation</button>
+                            <button id="pause-background-animation">Pause</button>
+                            <button id="reset-background-animation">Reset</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="background-visualization">
+                    <canvas id="background-canvas"></canvas>
+                </div>
+                
+                <div class="background-details-panel">
+                    <h3>About This Visualization</h3>
+                    <p>
+                        This animation represents a simplified view of neural activity. Each dot represents a neuron,
+                        and the lines represent connections between neurons. When a neuron "fires," it activates
+                        connected neurons based on the strength of their connections.
+                    </p>
+                    <p>
+                        In real neural networks, neurons only fire when their activation exceeds a threshold,
+                        and the pattern of connections is learned during training.
+                    </p>
+                    
+                    <div class="stats-panel">
+                        <h4>Statistics</h4>
+                        <div id="stats-container">
+                            <div class="stat-item">
+                                <div class="stat-label">Active Neurons:</div>
+                                <div id="active-neurons-count" class="stat-value">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Connections:</div>
+                                <div id="connections-count" class="stat-value">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Firing Rate:</div>
+                                <div id="firing-rate" class="stat-value">0 Hz</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -124,9 +441,8 @@
     <footer>
         <p>Neural Network Playground - Learn and visualize neural networks interactively</p>
         <div class="footer-links">
-            <a href="#" id="about-link">About</a>
-            <a href="#" id="guide-link">User Guide</a>
-            <a href="https://github.com/yourusername/neural-network-playground" target="_blank">GitHub</a>
+            <a href="https://x.com/Ameerazam18" id="about-link">Follow me on X</a>
+            <a href="https://github.com/Ameerazam08" target="_blank">GitHub</a>
         </div>
     </footer>
     
@@ -152,19 +468,34 @@
     </div>
     
     <!-- Layer Editor Modal -->
-    <div id="layer-editor-modal" class="modal layer-editor-modal">
+    <div id="layer-editor-modal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <h2 class="modal-title">Edit Layer</h2>
             <form class="layer-form">
                 <!-- Form fields will be dynamically generated based on layer type -->
             </form>
+            <div class="modal-footer">
+                <button type="button" class="save-layer-btn">Save Changes</button>
+                <button type="button" class="close-modal">Cancel</button>
+            </div>
         </div>
     </div>
     <!-- End Layer Editor Modal -->
     
-    <script src="js/main.js"></script>
+    <!-- Scripts - Note the order is important! -->
+    <script src="js/drag-drop-cleanup.js"></script>
+    <script src="js/complete-drag-fix.js"></script>
     <script src="js/neural-network.js"></script>
-    <script src="js/drag-drop.js"></script>
+    <script src="js/layer-editor.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/tab-manager.js"></script>
+    <script src="js/check-drag-drop.js"></script>
+    <script src="js/backpropagation.js"></script>
+    <script src="js/forward-propagation.js"></script>
+    <script src="js/background-animation.js"></script>
+    <script src="js/animation-diagnostics.js"></script>
+    <script src="js/animation-fixes.js"></script>
+    <script src="js/debug-utils.js"></script>
 </body>
 </html> 

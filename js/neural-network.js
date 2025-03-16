@@ -11,7 +11,8 @@
         'hidden': 0,
         'output': 0,
         'conv': 0,
-        'pool': 0
+        'pool': 0,
+        'linear': 0
     };
     
     // Default configuration templates for different layer types
@@ -21,7 +22,9 @@
             shape: [28, 28, 1],
             batchSize: 32,
             description: 'Input layer for raw data',
-            parameters: 0
+            parameters: 0,
+            inputShape: null,
+            outputShape: [784]
         },
         'hidden': {
             units: 128,
@@ -30,7 +33,9 @@
             kernelInitializer: 'glorotUniform',
             biasInitializer: 'zeros',
             dropoutRate: 0.2,
-            description: 'Dense hidden layer with ReLU activation'
+            description: 'Dense hidden layer with ReLU activation',
+            inputShape: null,
+            outputShape: null
         },
         'output': {
             units: 10,
@@ -38,7 +43,9 @@
             useBias: true,
             kernelInitializer: 'glorotUniform',
             biasInitializer: 'zeros',
-            description: 'Output layer with Softmax activation for classification'
+            description: 'Output layer with Softmax activation for classification',
+            inputShape: null,
+            outputShape: [10]
         },
         'conv': {
             filters: 32,
@@ -49,13 +56,31 @@
             useBias: true,
             kernelInitializer: 'glorotUniform',
             biasInitializer: 'zeros',
-            description: 'Convolutional layer for feature extraction'
+            description: 'Convolutional layer for feature extraction',
+            inputShape: null,
+            outputShape: null
         },
         'pool': {
             poolSize: [2, 2],
             strides: [2, 2],
             padding: 'valid',
-            description: 'Max pooling layer for spatial downsampling'
+            description: 'Max pooling layer for spatial downsampling',
+            inputShape: null,
+            outputShape: null
+        },
+        'linear': {
+            inputFeatures: 1,
+            outputFeatures: 1,
+            useBias: true,
+            activation: 'linear',
+            learningRate: 0.01,
+            optimizer: 'sgd',
+            lossFunction: 'mse',
+            biasInitializer: 'zeros',
+            kernelInitializer: 'glorotUniform',
+            description: 'Linear regression layer for numerical prediction',
+            inputShape: [1],
+            outputShape: [1]
         }
     };
     
@@ -128,10 +153,10 @@
     }
     
     /**
-     * Calculate the number of parameters for a layer
+     * Calculate parameters for a layer
      * @param {string} layerType - The type of the layer
      * @param {Object} config - Layer configuration
-     * @param {Object} prevLayerConfig - Previous layer configuration (for connections)
+     * @param {Object} prevLayerConfig - Configuration of the previous connected layer
      * @returns {number} - Number of trainable parameters
      */
     function calculateParameters(layerType, config, prevLayerConfig = null) {
@@ -144,10 +169,17 @@
                 
             case 'hidden':
                 if (prevLayerConfig) {
-                    const inputUnits = prevLayerConfig.units || 
-                                      (prevLayerConfig.shape ? 
-                                       prevLayerConfig.shape.reduce((a, b) => a * b, 1) : 
-                                       784);
+                    // Calculate input units from previous layer shape or units
+                    let inputUnits;
+                    if (prevLayerConfig.outputShape && Array.isArray(prevLayerConfig.outputShape)) {
+                        inputUnits = prevLayerConfig.outputShape.reduce((a, b) => a * b, 1);
+                    } else if (prevLayerConfig.units) {
+                        inputUnits = prevLayerConfig.units;
+                    } else if (prevLayerConfig.shape) {
+                        inputUnits = prevLayerConfig.shape.reduce((a, b) => a * b, 1);
+                    } else {
+                        inputUnits = 784; // Default fallback
+                    }
                     
                     // Weight parameters: input_units * output_units
                     parameters = inputUnits * config.units;
@@ -161,7 +193,15 @@
                 
             case 'output':
                 if (prevLayerConfig) {
-                    const inputUnits = prevLayerConfig.units || 128;
+                    // Calculate input units from previous layer
+                    let inputUnits;
+                    if (prevLayerConfig.outputShape && Array.isArray(prevLayerConfig.outputShape)) {
+                        inputUnits = prevLayerConfig.outputShape.reduce((a, b) => a * b, 1);
+                    } else if (prevLayerConfig.units) {
+                        inputUnits = prevLayerConfig.units;
+                    } else {
+                        inputUnits = 128; // Default fallback
+                    }
                     
                     // Weight parameters: input_units * output_units
                     parameters = inputUnits * config.units;
@@ -175,9 +215,17 @@
                 
             case 'conv':
                 if (prevLayerConfig) {
-                    const inputChannels = prevLayerConfig.shape ? 
-                                         prevLayerConfig.shape[2] || 1 : 
-                                         (prevLayerConfig.filters || 1);
+                    // Get input channels from previous layer
+                    let inputChannels;
+                    if (prevLayerConfig.outputShape && prevLayerConfig.outputShape.length > 2) {
+                        inputChannels = prevLayerConfig.outputShape[2];
+                    } else if (prevLayerConfig.shape && prevLayerConfig.shape.length > 2) {
+                        inputChannels = prevLayerConfig.shape[2];
+                    } else if (prevLayerConfig.filters) {
+                        inputChannels = prevLayerConfig.filters;
+                    } else {
+                        inputChannels = 1; // Default fallback
+                    }
                     
                     // Weight parameters: kernel_height * kernel_width * input_channels * filters
                     const kernelSize = Array.isArray(config.kernelSize) ? 
@@ -190,11 +238,31 @@
                     if (config.useBias) {
                         parameters += config.filters;
                     }
+                    
+                    // Calculate and store output shape
+                    if (prevLayerConfig.shape || prevLayerConfig.outputShape) {
+                        const inputShape = prevLayerConfig.outputShape || prevLayerConfig.shape;
+                        const padding = config.padding === 'same' ? Math.floor(config.kernelSize[0] / 2) : 0;
+                        const outputHeight = Math.floor((inputShape[0] - config.kernelSize[0] + 2 * padding) / config.strides[0]) + 1;
+                        const outputWidth = Math.floor((inputShape[1] - config.kernelSize[1] + 2 * padding) / config.strides[1]) + 1;
+                        
+                        config.outputShape = [outputHeight, outputWidth, config.filters];
+                    }
                 }
                 break;
                 
             case 'pool':
                 parameters = 0; // Pooling layers have no trainable parameters
+                
+                // Calculate and store output shape
+                if (prevLayerConfig && (prevLayerConfig.shape || prevLayerConfig.outputShape)) {
+                    const inputShape = prevLayerConfig.outputShape || prevLayerConfig.shape;
+                    const padding = config.padding === 'same' ? Math.floor(config.poolSize[0] / 2) : 0;
+                    const outputHeight = Math.floor((inputShape[0] - config.poolSize[0] + 2 * padding) / config.strides[0]) + 1;
+                    const outputWidth = Math.floor((inputShape[1] - config.poolSize[1] + 2 * padding) / config.strides[1]) + 1;
+                    
+                    config.outputShape = [outputHeight, outputWidth, inputShape[2]];
+                }
                 break;
                 
             default:
